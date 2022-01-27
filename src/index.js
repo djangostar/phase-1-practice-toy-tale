@@ -21,6 +21,7 @@ const toyCollection = document.querySelector('#toy-collection')
 const inputBttn = document.querySelector('input.submit')
 const toyForm = document.querySelector('.add-toy-form')
 toyForm.addEventListener('submit', submitForm)
+
 function getAllToys() {
   fetch('http://localhost:3000/toys')
   .then(res => res.json())
@@ -29,9 +30,10 @@ function getAllToys() {
   })
 }
 
+
 function renderToy(toy) {
-  console.log('hi')
-  console.log(toy)
+  //console.log('hi')
+  //console.log(toy)
   
   //create the Elements
   const createDiv = makeEl('div')
@@ -54,14 +56,14 @@ function renderToy(toy) {
   createDiv.append(createName, createImg, createP, createBttn)
   toyCollection.append(createDiv)
   //console.log(createDiv)
-  createBttn.addEventListener('click', () => {
-    ++createP.textContent
+  createBttn.addEventListener('click', (e) => {
+    updateLikes(e)
   })
 }
 
 
 function submitForm(e) {
-  //e.preventDefault()
+  e.preventDefault()
   fetch('http://localhost:3000/toys', {
     method: 'POST',
     headers: {
@@ -76,28 +78,31 @@ function submitForm(e) {
   })
   .then(res => res.json())
   .then(data => {
-    console.log(data)
+    //console.log(data)
     renderToy(data)
     toyForm.reset()
   })
 }
 
+
 function updateLikes(e) {
-  e.preventDefault()
-  fetch(`http://localhost:3000/toys/${e.id}`, {
+  const addLike = parseInt(e.target.previousElementSibling.innerText, 10) + 1
+  fetch(`http://localhost:3000/toys/${e.target.id}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     },
     body: JSON.stringify({
-      likes: createP.value
+      'likes': addLike
     })
   })
   .then(res => res.json())
-  .then(data => {
-    renderToy(data)
-    createDiv.reset()
+  .then(likeObj => {
+    e.target.previousElementSibling.innerText = `${addLike}`
+    //renderToy(likeObj) does not dynamically render app
   })
 }
+
+//what if we create an update toy func to dynamically update the toy on the DOM
 
