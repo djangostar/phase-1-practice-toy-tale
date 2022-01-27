@@ -1,6 +1,7 @@
 let addToy = false;
 
 document.addEventListener("DOMContentLoaded", () => {
+  getAllToys()
   const addBtn = document.querySelector("#new-toy-btn");
   const toyFormContainer = document.querySelector(".container");
   addBtn.addEventListener("click", () => {
@@ -14,10 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+
 const makeEl = el => document.createElement(el)
 const toyCollection = document.querySelector('#toy-collection')
 const inputBttn = document.querySelector('input.submit')
 const toyForm = document.querySelector('.add-toy-form')
+toyForm.addEventListener('submit', submitForm)
 function getAllToys() {
   fetch('http://localhost:3000/toys')
   .then(res => res.json())
@@ -51,19 +54,14 @@ function renderToy(toy) {
   createDiv.append(createName, createImg, createP, createBttn)
   toyCollection.append(createDiv)
   //console.log(createDiv)
+  createBttn.addEventListener('click', () => {
+    ++createP.textContent
+  })
 }
 
 
 function submitForm(e) {
-  e.preventDefault()
-  const nameInput = toyForm[0]
-  const imgInput = toyForm[1]
-  nameInput.textContent = `${e.target.name}`
-  imgInput.textContent = `${e.target.image}`
-  
-}
-
-function postFunc() { 
+  //e.preventDefault()
   fetch('http://localhost:3000/toys', {
     method: 'POST',
     headers: {
@@ -71,11 +69,35 @@ function postFunc() {
       'Accept': 'application/json'
     },
     body: JSON.stringify({
-      name: 'name',
-      img: 'img',
+      name: e.target.querySelectorAll('input')[0].value,
+      imgage: e.target.querySelectorAll('input')[1].value,
       likes: 0
     })
   })
-  toyForm.addEventListener('submit', submitForm)
+  .then(res => res.json())
+  .then(data => {
+    console.log(data)
+    renderToy(data)
+    toyForm.reset()
+  })
 }
-getAllToys()
+
+function updateLikes(e) {
+  e.preventDefault()
+  fetch(`http://localhost:3000/toys/${e.id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      likes: createP.value
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    renderToy(data)
+    createDiv.reset()
+  })
+}
+
